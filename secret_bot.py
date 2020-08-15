@@ -29,7 +29,7 @@ def index():
         numb = int(secret_bot.text)
         for i in range(numb):
             secret_bot.send_secret()
-            return 'ex'
+        return 'ex'
     except ValueError:
         secret_bot.send_text('Просто попроси... (/get)')
         return 'ex'
