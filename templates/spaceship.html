@@ -1,0 +1,484 @@
+<style>
+        body {
+        background-color: #fff;
+    }
+
+    .spaceship {
+        top: 90px;
+        position: absolute;
+        z-index: 2;
+        /* background-color: #147479; */
+        width: 30px;
+        height: 36px;
+        background-image: url({{ url_for("static", filename='spaceship_steady.png') }});
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .spaceship.up {
+        width: 30;
+        height: 42;
+        background-image: url({{ url_for("static", filename='spaceship_up.png') }});
+    }
+
+    .spaceship.crashed {
+        /* background-color: #C5283D; */
+        width: 72;
+        height: 36;
+        background-image: url({{ url_for("static", filename='spaceship_crashed.png') }});
+    }
+
+    .spaceship.landed {
+        /* background-color: #CFFFB3; */
+        background-image: url(./img/spaceship_onLand.png);
+    }
+
+    .platform {
+        width: 100px;
+        height: 24px;
+        position: absolute;
+        bottom: 0;
+        left: 100px;
+        z-index: 1;
+        /* /* border: solid 2px; */
+        /* border-radius: 2px; */
+        /* background-color: #FFA400; */
+        background-image: url({{ url_for("static", filename='platform.png') }});
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .statsBack {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+    }
+
+    .stats {
+        width: 300px;
+        height: auto;
+        /* position: relative; */
+        z-index: 0;
+        border-radius: 2px;
+        background-color: #3943B7;
+        color: #000;
+        font-size: 20px;
+        font-family: monospace;
+        padding: 10px;
+    }
+
+    .altitude {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+
+    .speed {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+
+    .windSpeed {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+
+    .fuelBar {
+        width: 320px;
+        height: 78px;
+        /* position: relative; */
+        /* top: 98px; */
+        right: 20px;
+        z-index: 0;
+        border-radius: 2px;
+        background-color: #717568;
+        /* padding: 10px; */
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .fuelLeft {
+        width: 160px;
+        height: 78px;
+        /* position: relative; */
+        top: 0px;
+        right: 0px;
+        z-index: 1;
+        border-radius: 2px;
+        background-color: maroon;
+        box-shadow: 1px 0px 10px 0px #00000088;
+    }
+
+    .reload {
+        display: flex;
+        width: 400px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-top: -100px;
+        margin-left: -200px;
+        font-size: 30px;
+        font-family: monospace;
+        border-radius: 2px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        z-index: 4;
+        background-color: #ffffff00;
+    }
+</style>
+<div id="falcon" class="spaceship"></div>
+<div id="platform" class="platform"></div>
+
+<div id="statsBack" class="statsBack">
+    <div id="stats" class="stats">
+        <div id="speed" class="speed"></div>
+        <div id="altitude" class="altitude"></div>
+        <div id="windSpeed" class="windSpeed"></div>
+    </div>
+    <div id="fuel" class="fuelBar">
+        <div id="fuelLeft" class="fuelLeft"></div>
+    </div>
+</div>
+<div id="reload" class="reload"></div>
+
+<script>
+    var game = {
+            keys: [],
+            tic: 20,
+            statsPlate: document.getElementById("stats"),
+            speed: document.getElementById("speed"),
+            altitude: document.getElementById("altitude"),
+            windSpeed: document.getElementById("windSpeed"),
+            fuelBar: document.getElementById("fuel"),
+            fuelLeft: document.getElementById("fuelLeft"),
+            reloadBar: document.getElementById("reload"),
+            gameTimer: NaN,
+
+
+            start: function() {
+                window.focus();
+                window.addEventListener("resize", spaceship.init);
+                document.addEventListener("keydown", game.keyDown);
+                document.addEventListener("keyup", game.keyUp);
+                gameTimer = setInterval(game.loop, game.tic);
+                let changeWindForceTimer = setInterval(environment.setWindForce, game.tic * 50);
+                spaceship.create();
+                environment.init();
+                platform.create();
+            },
+            keyDown: function() {
+                if (game.keys.indexOf(event.code) == -1) {
+                    game.keys.push(event.code);
+                }
+            },
+            keyUp: function() {
+                if (game.keys.indexOf("KeyR") != -1) {
+                    game.reload();
+                } else if (game.keys.indexOf("KeyW" != -1)) {
+                    spaceship.rocketElement.classList.remove("up");
+
+                }
+                game.keys.splice(game.keys.indexOf(event.code), 1);
+            },
+            controls: {
+                checkGameOver: function() {
+                    spaceship.engine.fuel.status();
+                    if (spaceship.getAltitude() <= platform.height) {
+                        if (spaceship.ifOnPlatform() && spaceship.getState() == 1 && spaceship.ifSpeedSecure()) {
+                            console.log("Landed!");
+                            spaceship.rocketElement.classList.add("landed");
+                            game.activityStop();
+                        } else if (spaceship.ifOnPlatform() && !spaceship.ifSpeedSecure()) {
+                            console.log("Exploded!");
+                            spaceship.rocketElement.classList.add("crashed");
+                            game.activityStop();
+                        } else if (spaceship.ifOnPlatform() && spaceship.getState() == 0) {
+                            console.log("Exploded__2!");
+                            spaceship.rocketElement.classList.add("crashed");
+                            game.activityStop();
+                        }
+                    }
+                    if (spaceship.getAltitude() == 0) {
+                        spaceship.rocketElement.classList.add("crashed");
+                        game.activityStop();
+                    }
+                    if (spaceship.getAltitude() == environment.maxY) {
+                        spaceship.rocketElement.classList.add("crashed");
+                        spaceship.stop();
+                        spaceship.(0);
+                    }
+
+                }
+            },
+            loop: function() {
+                game.controls.checkGameOver();
+                game.changePosition();
+                game.displayStats();
+                game.displayFuel();
+                environment.gravity();
+                environment.wind(environment.windForce);
+                // environment.wind(Math.random() / 2 - 0.5);
+                spaceship.calculateSpaceshipCentre();
+                spaceship.updatePosition();
+                spaceship.engine.workBasic();
+                console.log(spaceship.getSpeedY(), spaceship.ifSpeedSecure());
+
+            },
+            loopWind: function() {
+                environment.setWindForce();
+            },
+            activityStop: function() {
+                clearInterval(gameTimer);
+                spaceship.stop();
+                environment.stop();
+                game.displayReloadMessage();
+            },
+            changePosition: function() {
+                for (let i = 0; i < game.keys.length; i++) {
+
+                    // console.log(game.keys);
+                    // if (["KeyR"].indexOf(game.keys[i]) != -1) {
+                    //     spaceship.rocketElement.classList.remove("crashed", "landed");
+                    //     spaceship.speedX = spaceship.speedX ^ spaceship.speedX;
+                    //     spaceship.speedY = spaceship.speedY ^ spaceship.speedY;
+                    //     environment.init();
+                    //     platform.create();
+                    //     spaceship.create();
+                    // }
+                    if (["KeyW", "ArrowUp"].indexOf(game.keys[i]) != -1) {
+                        spaceship.setSpeedY(-spaceship.engine.power);
+                        spaceship.engine.workOnThrust();
+                        if (spaceship.getState() != false) {
+                            spaceship.rocketElement.classList.add("up");
+                        }
+                        // speedX -= step;
+                        // speedX = Math.round(speedX * 100) / 100;
+                    }
+                    if (["KeyA", "ArrowLeft"].indexOf(game.keys[i]) != -1) {
+                        spaceship.setSpeedX(-spaceship.engine.power);
+                        // speedX -= step;
+                        // speedX = Math.round(speedX * 100) / 100;
+                    }
+                    if (["KeyD", "ArrowRight"].indexOf(game.keys[i]) != -1) {
+                        spaceship.setSpeedX(spaceship.engine.power);
+                        // speedX += step;
+                        // speedX = Math.round(speedX * 100) / 100;
+                    }
+                    if (["KeyS", "ArrowDown"].indexOf(game.keys[i]) != -1) {
+                        spaceship.setSpeedY(spaceship.engine.power);
+                        // speedX -= step;
+                        // speedX = Math.round(speedX * 100) / 100;
+                    }
+                }
+            },
+            reload: function() {
+                spaceship.rocketElement.classList.remove("crashed", "landed");
+                game.reloadBar.innerHTML = "";
+                game.reloadBar.style.backgroundColor = "#00000000"
+                spaceship.speedX = spaceship.speedX ^ spaceship.speedX;
+                spaceship.speedY = spaceship.speedY ^ spaceship.speedY;
+                environment.init();
+                platform.create();
+                spaceship.create();
+                gameTimer = setInterval(game.loop, game.tic);
+            },
+            displayReloadMessage: function() {
+                game.reloadBar.style.backgroundColor = "#00000088";
+                game.reloadBar.style.color = "#fff";
+                game.reloadBar.innerHTML = "Press R to start again"
+            },
+            displayStats: function() {
+                // innerHTML
+                game.speed.innerHTML = "Speed: " + Math.round(spaceship.getSpeedY());
+                game.altitude.innerHTML = "Altitude: " + (spaceship.getAltitude() - platform.height);
+                game.windSpeed.innerHTML = "Wind speed: " + Math.round(environment.windForce * 1000) / 1000;
+            },
+            displayFuel: function() {
+                // game.fuelLeft.style.width *= spaceship.engine.fuel.volume / spaceship.engine.fuel.volumeFull;
+                game.fuelLeft.style.width = game.fuelBar.offsetWidth * spaceship.engine.fuel.volume / spaceship.engine.fuel.volumeFull;
+            }
+        },
+        spaceship = {
+            x: 0,
+            y: 0,
+            centre: 0,
+            engine: {
+                power: 0,
+                workBasic: function() {
+                    if (spaceship.engine.fuel.isOver() == false && spaceship.getState() == 1) {
+                        spaceship.engine.fuel.volume -= spaceship.engine.fuel.consumptionBasic;
+                    } else {
+                        spaceship.setState(0);
+                    }
+                },
+                workOnThrust: function() {
+                    if (spaceship.engine.fuel.isOver() == false && spaceship.getState() == 1) {
+                        spaceship.engine.fuel.volume -= spaceship.engine.fuel.consumptionOnThrust;
+                    } else {
+                        spaceship.setState(0);
+                        console.log("Fuel 0");
+                    }
+                },
+                fuel: {
+                    volumeFull: 100,
+                    volume: fuel.volumeFull,
+                    consumptionBasic: 0.1,
+                    consumptionOnThrust: 0.5,
+                    status: function() {
+                        if (spaceship.engine.fuel.isOver()) {
+                            spaceship.engine.stop();
+                        }
+                    },
+                    isOver: function() {
+                        return spaceship.engine.fuel.volume < 0;
+                    }
+                },
+                stop: function() {
+                    spaceship.engine.power = 0;
+                    spaceship.setState(0);
+                }
+            },
+            rocketElement: {},
+            create: function() {
+                spaceship.rocketElement = document.getElementById("falcon");
+                spaceship.init();
+            },
+            init: function() {
+                spaceship.state = 1;
+                spaceship.x = window.innerWidth / 2 - spaceship.rocketElement.offsetWidth / 2;
+                spaceship.y = 30;
+                spaceship.centre = spaceship.calculateSpaceshipCentre();
+                spaceship.speedX = 0;
+                spaceship.speedY = 0;
+                spaceship.maxSpeedOnLandingY = 10;
+                spaceship.engine.power = 0.5;
+                spaceship.engine.fuel.volume = 100;
+                spaceship.engine.fuel.consumptionOnThrust = 0.5;
+                spaceship.updatePosition();
+            },
+            setSpeedX: function(speedIncrement) {
+                spaceship.speedX += speedIncrement;
+            },
+            setSpeedY: function(speedIncrement) {
+                spaceship.speedY += speedIncrement;
+            },
+            getSpeedY: function() {
+                return spaceship.speedY;
+            },
+            setPositionX: function(nextX) {
+                spaceship.x = nextX;
+                spaceship.rocketElement.style.left = nextX + "px";
+            },
+            setPositionY: function(nextY) {
+                spaceship.y = nextY;
+                spaceship.rocketElement.style.top = nextY + "px";
+            },
+            calculateNextX: function() {
+                let nextX = spaceship.x + spaceship.speedX;
+                nextX = nextX <= environment.minX ? environment.maxX - 1 : nextX;
+                nextX = nextX >= environment.maxX ? environment.minX : nextX;
+                // if (environment.minX >= nextX) {
+                //     nextX = environment.maxX + 1;
+                // }
+                // if (environment.maxX <= nextX) {
+                //     nextX = environment.minX + 1;
+                // }
+                return nextX;
+            },
+            calculateNextY: function() {
+                // return spaceship.y + spaceship.speedY;
+                let nextY = spaceship.y + spaceship.speedY;
+                nextY = nextY <= environment.minY ? environment.minY : nextY;
+                if (spaceship.ifOnPlatform()) {
+                    nextY = nextY >= environment.maxY - platform.height ? environment.maxY - platform.height : nextY;
+                } else {
+                    nextY = nextY >= environment.maxY ? environment.maxY : nextY;
+                }
+                return nextY;
+            },
+            updatePosition: function() {
+                spaceship.setPositionX(spaceship.calculateNextX());
+                spaceship.setPositionY(spaceship.calculateNextY());
+                // console.log(spaceship.speedY);
+            },
+            getAltitude: function() {
+                return window.innerHeight - spaceship.rocketElement.offsetHeight - spaceship.rocketElement.offsetTop;
+            },
+            calculateSpaceshipCentre: function() {
+                spaceship.centre = spaceship.rocketElement.offsetLeft + spaceship.rocketElement.offsetWidth / 2
+                return spaceship.rocketElement.offsetLeft + spaceship.rocketElement.offsetWidth / 2;
+            },
+            ifOnPlatform() {
+                return platform.left < spaceship.centre && platform.right > spaceship.centre;
+            },
+            ifSpeedSecure() {
+                return spaceship.getSpeedY() <= spaceship.maxSpeedOnLandingY;
+            },
+            stop: function() {
+                spaceship.engine.power = 0;
+                spaceship.speedY = 0;
+                spaceship.speedX = 0;
+                spaceship.setState(0);
+            },
+            getState: function() {
+                return spaceship.state;
+            },
+            setState: function(newState) {
+                spaceship.state = newState;
+            }
+        },
+        environment = {
+            init: function() {
+                environment.minX = 0;
+                environment.maxX = window.innerWidth - spaceship.rocketElement.offsetWidth;
+                environment.minY = 0;
+                environment.maxY = window.innerHeight - spaceship.rocketElement.offsetHeight;
+                environment.g = 0.1;
+                environment.setWindForce();
+            },
+            gravity: function() {
+                spaceship.speedY += environment.g;
+            },
+            setWindForce: function() {
+                environment.windForce = (Math.random() / 2) - 0.25;
+            },
+            wind: function(windForce) {
+                // console.log(environment.windForce, spaceship.speedX);
+                spaceship.setSpeedX(environment.windForce);
+            },
+            stop: function() {
+                environment.g = 0;
+                environment.windForce = 0;
+            }
+
+        },
+        platform = {
+            // platformElement: {},
+            // left: 0,
+            // right: 0,
+            create: function() {
+                platform.platformElement = document.getElementById("platform");
+                platform.positionInit();
+                platform.left = platform.platformElement.offsetLeft;
+                platform.right = platform.platformElement.offsetLeft + platform.platformElement.offsetWidth;
+                platform.height = platform.platformElement.offsetHeight;
+            },
+            positionInit: function() {
+                platform.left = Math.round((Math.random() * (window.innerWidth - platform.platformElement.offsetWidth)));
+                platform.platformElement.style.left = platform.left + "px";
+
+            }
+        }
+        // let gameTimer = setInterval(game.loop, game.tic);
+
+    game.start();
+</script>

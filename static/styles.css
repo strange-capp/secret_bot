@@ -1,0 +1,135 @@
+    body {
+        background-color: #fff;
+    }
+    
+    .spaceship {
+        top: 90px;
+        position: absolute;
+        z-index: 2;
+        /* background-color: #147479; */
+        width: 30px;
+        height: 36px;
+        background-image: url(./img/spaceship_steady.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    .spaceship.up {
+        width: 30;
+        height: 42;
+        background-image: url(./img/spaceship_up.png);
+    }
+    
+    .spaceship.crashed {
+        /* background-color: #C5283D; */
+        width: 72;
+        height: 36;
+        background-image: url(./img/spaceship_crashed.png);
+    }
+    
+    .spaceship.landed {
+        /* background-color: #CFFFB3; */
+        background-image: url(./img/spaceship_onLand.png);
+    }
+    
+    .platform {
+        width: 100px;
+        height: 24px;
+        position: absolute;
+        bottom: 0;
+        left: 100px;
+        z-index: 1;
+        /* /* border: solid 2px; */
+        /* border-radius: 2px; */
+        /* background-color: #FFA400; */
+        background-image: url(./img/platform.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    .statsBack {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+    }
+    
+    .stats {
+        width: 300px;
+        height: auto;
+        /* position: relative; */
+        z-index: 0;
+        border-radius: 2px;
+        background-color: #3943B7;
+        color: #000;
+        font-size: 20px;
+        font-family: monospace;
+        padding: 10px;
+    }
+    
+    .altitude {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+    
+    .speed {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+    
+    .windSpeed {
+        color: #fff;
+        font-size: 25px;
+        font-family: monospace;
+    }
+    
+    .fuelBar {
+        width: 320px;
+        height: 78px;
+        /* position: relative; */
+        /* top: 98px; */
+        right: 20px;
+        z-index: 0;
+        border-radius: 2px;
+        background-color: #717568;
+        /* padding: 10px; */
+        margin-top: 10px;
+        overflow: hidden;
+    }
+    
+    .fuelLeft {
+        width: 160px;
+        height: 78px;
+        /* position: relative; */
+        top: 0px;
+        right: 0px;
+        z-index: 1;
+        border-radius: 2px;
+        background-color: maroon;
+        box-shadow: 1px 0px 10px 0px #00000088;
+    }
+    
+    .reload {
+        display: flex;
+        width: 400px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-top: -100px;
+        margin-left: -200px;
+        font-size: 30px;
+        font-family: monospace;
+        border-radius: 2px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        z-index: 4;
+        background-color: #ffffff00;
+    }
