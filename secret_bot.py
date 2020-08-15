@@ -23,6 +23,9 @@ def index():
     response = request.get_json(force=True)
     secret_bot = SecretBot(token=bot_token, data=response, name='secret_bot')
     try:
+        if secret_bot.text == '/get':
+            secret_bot.send_secret()
+            return 'ex'
         numb = int(secret_bot.text)
         for i in range(numb):
             secret_bot.send_secret()
@@ -30,10 +33,7 @@ def index():
         secret_bot.send_text('Просто попроси... (/get)')
         return 'ex'
 
-    if secret_bot.text == '/get':
-        secret_bot.send_secret()
-    else:
-        secret_bot.send_text('Просто попроси... (/get)')
+    secret_bot.send_text('Просто попроси... (/get)')
 
     return 'ex'
 
