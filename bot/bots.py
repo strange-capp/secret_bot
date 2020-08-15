@@ -126,7 +126,7 @@ class SecretBot(BigBot):
         chat_id = chat_id or self.current_chat_id
         response = requests.get(self.url + 'sendPhoto',
                                 {'chat_id': chat_id, 'photo': self.secret.photo,
-                                 'caption': self.text})
+                                 'caption': self.compose_message()})
         if response.status_code == 200:
             return True
         else:
