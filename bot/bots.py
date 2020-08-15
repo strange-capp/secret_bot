@@ -108,16 +108,18 @@ class SecretBot(BigBot):
 
         template = """
         Итак, магия!
-        %s
+%s
         
-        %s
+%s
         
-        Модели:%s
+Модели: 
+%s
         
-        Категории:%s
+Категории: 
+%s
         
-        И самое важное)
-        Ссылка: %s""" % (title, description,
+И самое важное)
+Ссылка: %s""" % (title, description,
                          models, categories, url)
 
         return template
