@@ -64,16 +64,16 @@ class Secret:
     def model(self):
         links = self.soup.find_all('a')
 
-        model = None
+        model = []
 
         for link in links:
             try:
                 if link['class'] == ['model_link']:
-                    model = link.string
+                    model.append(link.string)
             except KeyError:
                 continue
 
-        return model
+        return ', '.join(model)
 
     @property
     def categories(self):
