@@ -22,6 +22,13 @@ def rocket():
 def index():
     response = request.get_json(force=True)
     secret_bot = SecretBot(token=bot_token, data=response, name='secret_bot')
+    try:
+        numb = int(secret_bot.text)
+        for i in range(numb):
+            secret_bot.send_secret()
+    except ValueError:
+        secret_bot.send_text('Просто попроси... (/get)')
+        return 'ex'
 
     if secret_bot.text == '/get':
         secret_bot.send_secret()
