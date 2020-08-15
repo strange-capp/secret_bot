@@ -107,7 +107,6 @@ class SecretBot(BigBot):
         url = self.secret.link
 
         template = """
-        Итак, магия!
 %s
         
 %s
@@ -119,8 +118,10 @@ class SecretBot(BigBot):
 %s
         
 И самое важное)
-Ссылка: %s""" % (title, description,
-                         models, categories, url)
+Ссылка: %s
+
+/get""" % (title, description,
+                         models if models else '', categories, url)
 
         return template
 

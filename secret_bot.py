@@ -2,7 +2,6 @@ from flask import Flask, request, render_template
 from bot.bots import SecretBot
 import telegram
 
-
 app = Flask(__name__)
 
 bot_token = '1280960486:AAGQTDXcI3Dx8_HEVE56yMSXdzbdZXvJuIE'
@@ -22,16 +21,15 @@ def rocket():
            methods=['POST'])
 def index():
     response = request.get_json(force=True)
-    bot = SecretBot(token=bot_token, data=response, name='secret_bot')
+    secret_bot = SecretBot(token=bot_token, data=response, name='secret_bot')
 
-    print(str(response))
-
-    is_sent = bot.send_secret()
-
-    if is_sent:
-        return "200"
+    if secret_bot.text == '/get':
+        secret_bot.send_secret()
     else:
-        return 'ex'
+        secret_bot.send_text('Просто попроси... (/get)')
+
+    return 'ex'
+
 
 @app.route('/setwebhook', methods=['GET', 'POST'])
 def set_webhook():
