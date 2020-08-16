@@ -38,7 +38,7 @@ def index():
     if secret_bot.name_of_interlocutor == 'ttt':
         print(secret_bot.current_chat_id)
 
-    secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor,
+    secret_bot.send_text('New message to ' + str(secret_bot.username_of_interlocutor),
                          chat_id=782633810)
 
     return 'ex'
