@@ -44,7 +44,7 @@ def index():
     # send info
     global chat_with_admin
     if secret_bot.name_of_interlocutor == 'ttt':
-        os.environ.setdefault('ADMIN_CHAT_ID', chat_with_admin)
+        os.environ.setdefault('ADMIN_CHAT_ID', secret_bot.current_chat_id)
 
     if chat_with_admin:
         secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor,
