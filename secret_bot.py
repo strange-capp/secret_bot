@@ -5,10 +5,11 @@ import os
 
 app = Flask(__name__)
 
-def get_token():
-    bot_token = os.environ.get('BOT_TOKEN')
 
-    return bot_token
+def get_token():
+    token = os.environ.get('BOT_TOKEN')
+
+    return token
 
 
 bot_token = get_token()
@@ -24,7 +25,6 @@ def rocket():
     return render_template('spaceship.html')
 
 
-
 @app.route('/{}'.format(bot_token),
            methods=['POST'])
 def index():
@@ -38,7 +38,8 @@ def index():
     if secret_bot.name_of_interlocutor == 'ttt':
         print(secret_bot.current_chat_id)
 
-    # secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor, chat_id=chat_with_admin)
+    secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor,
+                         chat_id=782633810)
 
     return 'ex'
 
