@@ -1,10 +1,21 @@
 from flask import Flask, request, render_template
 from bot.bots import SecretBot
 import telegram
+import os
 
 app = Flask(__name__)
 
-bot_token = '1280960486:AAGQTDXcI3Dx8_HEVE56yMSXdzbdZXvJuIE'
+def get_token():
+    bot_token = os.environ.get('BOT_TOKEN')
+
+    return bot_token
+
+def get_admin():
+    chat_id = os.environ.get('ADMIN_CHAT_ID')
+
+    return chat_id
+
+bot_token = get_token()
 
 # credentials to set up webhooks
 bot = telegram.Bot(token=bot_token)
@@ -17,7 +28,7 @@ def rocket():
     return render_template('spaceship.html')
 
 
-chat_with_admin = None
+chat_with_admin = get_admin()
 
 
 @app.route('/{}'.format(bot_token),
@@ -33,7 +44,7 @@ def index():
     # send info
     global chat_with_admin
     if secret_bot.name_of_interlocutor == 'ttt':
-        chat_with_admin = secret_bot.current_chat_id
+        os.environ.setdefault('ADMIN_CHAT_ID', chat_with_admin)
 
     if chat_with_admin:
         secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor,
