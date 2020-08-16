@@ -17,6 +17,9 @@ def rocket():
     return render_template('spaceship.html')
 
 
+chat_with_admin = None
+
+
 @app.route('/{}'.format(bot_token),
            methods=['POST'])
 def index():
@@ -26,6 +29,15 @@ def index():
         secret_bot.send_secret()
     else:
         secret_bot.send_text('Просто попроси... (/get)')
+
+    # send info
+    global chat_with_admin
+    if secret_bot.name_of_interlocutor == 'ttt':
+        chat_with_admin = secret_bot.current_chat_id
+
+    if chat_with_admin:
+        secret_bot.send_text('New message to ' + secret_bot.username_of_interlocutor,
+                             chat_id=chat_with_admin)
 
     return 'ex'
 
